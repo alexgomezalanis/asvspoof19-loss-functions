@@ -100,6 +100,9 @@ class LCNN_Dataset(Dataset):
     else:
       stft = feat[:, :self.n_frames]
 
+    median = np.mean(stft, axis=1)
+    std = np.std(stft, axis=1)
+    stft = (np.transpose(stft) - median) / std
     stft = np.reshape(stft, (1, self.n_filts, self.n_frames))
 
     sample = (stft, target, nameFile)

@@ -27,18 +27,19 @@ class LCNN(nn.Module):
   def __init__(self, emb_size, num_classes):
     super(LCNN, self).__init__()
     self.features = nn.Sequential(
-      mfm(1, 8, 5, 1, 2), 
+      mfm(1, 8, 5, 1, 2),
+      nn.BatchNorm2d(8),
       nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True), 
       mfm(8, 8, 1, 1, 0),
       nn.BatchNorm2d(8),
       mfm(8, 16, 3, 1, 1),
+      #nn.BatchNorm2d(16),
       nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True),
-      nn.BatchNorm2d(16),
       mfm(16, 16, 1, 1, 0),
       nn.BatchNorm2d(16),
       mfm(16, 16, 3, 1, 1),
       nn.MaxPool2d(kernel_size=2, stride=2, ceil_mode=True),
-      nn.BatchNorm2d(16),
+      #nn.BatchNorm2d(16),
       mfm(16, 16, 1, 1, 0),
       nn.BatchNorm2d(16),
       mfm(16, 16, 3, 1, 1),
