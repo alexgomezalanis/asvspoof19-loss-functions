@@ -82,8 +82,6 @@ if __name__ == '__main__':
   model_location = os.path.join(rootPath, 'models', dirSpoof, dirEmbeddings)
   create_directory(model_location)
 
-  print(args)
-
   #params = list(model.parameters()) + list(criterion.parameters())
   #optimizer = optim.Adam(params, lr=args.lr)
 

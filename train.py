@@ -83,11 +83,14 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
   pid = os.getpid()
   for batch_idx, sample in enumerate(data_loader):
     (stft, target, _) = sample
+    target = torch.LongTensor(target).to(device)
     stft = stft.to(device)
     optimizer.zero_grad()
     output, embeddings = model.forward(stft)
     if args.loss_method == 'softmax':
       loss = criterion(output, target)
+    else:
+      loss = criterion(embeddings, target)
     loss.backward()
     optimizer.step()
 
@@ -104,11 +107,14 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
   with torch.no_grad():
     for batch_idx, sample in enumerate(data_loader):
       (stft, target, _) = sample
+      target = torch.LongTensor(target).to(device)
       stft = stft.to(device)
       optimizer.zero_grad()
       output, embeddings = model.forward(stft)
       if args.loss_method == 'softmax':
-        test_loss += criterion(output, target)
+        test_loss += criterion(output, target).item() # sum up batch loss
+      else:
+        test_loss += criterion(embeddings, target)
 
   test_loss /= len(data_loader.dataset)
 
