@@ -113,8 +113,6 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
       if args.loss_method == 'softmax':
         test_loss += criterion(output, target).item() # sum up batch loss
       elif args.loss_method.startswith('angular'):
-        print('Embeddings shape')
-        print(embeddings.shape)
         test_loss += criterion(embeddings, target)
 
   print('\nDevelopment loss: {:.4f}\n'.format(test_loss))
