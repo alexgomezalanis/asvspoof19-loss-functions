@@ -19,6 +19,7 @@ class TripletLoss(nn.Module):
 
   def triplet_selector(self, embeddings, target):
     classes = np.unique(target)
+    num_classes = len(classes)
     digit_indices = [np.where(target == i)[0] for i in classes]
     anchor_indices = negative_indices = positive_indices = []
     for index_pos, arr_pos in enumerate(digit_indices):
@@ -35,7 +36,7 @@ class TripletLoss(nn.Module):
         count = 0
         min_dist = float('Inf')
         while count < 150:
-          index_neg = randint(0, self.num_classes - 1)
+          index_neg = randint(0, num_classes - 1)
           if index_neg != index_pos:
             count += 1
             arr_neg = digit_indices[index_neg]
