@@ -11,7 +11,6 @@ rootPath = os.getcwd()
 root_dir = '/home2/alexgomezalanis/la-challenge/flac-files'
 
 def train(args, model, start_epoch, criterion, optimizer, device, model_location):
-
   train_protocol = 'train_la.csv' if args.is_la else 'train_pa.csv'
   dev_protocol = 'dev_la.csv' if args.is_la else 'dev_pa.csv'
   root_dir = '/home2/alexgomezalanis'
@@ -89,7 +88,7 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
     output, embeddings = model.forward(stft)
     if args.loss_method == 'softmax':
       loss = criterion(output, target)
-    else:
+    elif args.loss_method.startswith('angular'):
       loss = criterion(embeddings, target)
     loss.backward()
     optimizer.step()
@@ -113,7 +112,7 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
       output, embeddings = model.forward(stft)
       if args.loss_method == 'softmax':
         test_loss += criterion(output, target).item() # sum up batch loss
-      else:
+      elif args.loss_method.startswith('angular'):
         test_loss += criterion(embeddings, target)
 
   print('\nDevelopment loss: {:.4f}\n'.format(test_loss))

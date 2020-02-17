@@ -8,6 +8,7 @@ import torch.multiprocessing as mp
 from model import LCNN
 from train import train
 from eval import eval
+from angular_softmax_loss import AngularPenaltySMLoss
 #from kernel_density_loss import KernelDensityLoss
 from utils.checkpoint import load_checkpoint, create_directory
 
@@ -58,7 +59,7 @@ parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in [
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
 parser.add_argument('--loss-method', type=str, default='softmax',
-                    help='softmax, contrast, triplet or all')
+                    help='softmax, angular_softmax_sphereface, angular_softmax_cosface')
 
 rootPath = os.getcwd()
                   
@@ -72,27 +73,22 @@ if __name__ == '__main__':
   torch.manual_seed(args.seed)
 
   model = LCNN(args.emb_size, args.num_classes).to(device)
-  criterion = nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters(), lr=args.lr)
+
+  if args.loss_method == 'softmax':
+    criterion = nn.CrossEntropyLoss()
+  elif args.loss_method == 'angular_softmax_sphereface':
+    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, loss_type='sphereface')
+  elif args.loss_method == 'angular_softmax_cosface':
+    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, loss_type='cosface')
+
+  params = list(model.parameters()) + list(criterion.parameters())
+  optimizer = optim.Adam(params, lr=args.lr)
 
   # Model and xvectors path
   dirSpoof = 'LA' if args.is_la else 'PA'
   dirEmbeddings = 'lcnn_' + args.version + '_loss_' + args.loss_method + '_emb_' + str(args.emb_size) + '_classes_' + str(args.num_classes)
-
   model_location = os.path.join(rootPath, 'models', dirSpoof, dirEmbeddings)
   create_directory(model_location)
-
-  #params = list(model.parameters()) + list(criterion.parameters())
-  #optimizer = optim.Adam(params, lr=args.lr)
-
-  '''if args.loss_method == 'triplet' or args.loss_method == 'all':
-    dirIvector = args.loss_method + '_margin_' + str(args.margin_triplet)
-  else:
-    dirIvector = args.loss_method'''
-
-  #embeddings_path = dirIvector + '_lr_' + str(args.lr) + '_batch_' + str(args.batch_size) + '_version_' + str(args.version)
-  #model_location = rootPath + '/models/lcnn_v4_' + embeddings_path
-  #create_directory(model_location)
 
   if (args.load_epoch != -1):
     path_model_location = os.path.join(model_location, 'epoch-' + str(args.load_epoch) + '.pt')
@@ -161,5 +157,7 @@ if __name__ == '__main__':
         softmax_location=softmax_location,
         device=device,
         mp=mp)
+    
+    
   
   
