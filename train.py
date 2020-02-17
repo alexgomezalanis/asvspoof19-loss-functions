@@ -41,7 +41,7 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
   #train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
   #dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False)
 
-  train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
+  train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
     num_workers=args.num_data_workers)
   dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False,
     num_workers=args.num_data_workers)
