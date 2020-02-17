@@ -41,8 +41,6 @@ parser.add_argument('--window-length', type=float, default=0.025,
                     help='Window Length to compute STFT (s)')
 parser.add_argument('--frame-shift', type=float, default=0.010,
                     help='Frame Shift to compute STFT (s)')
-parser.add_argument('--loss-method', type=str, default='softmax',
-                    help='softmax, contrast, triplet or all')
 parser.add_argument('--margin-triplet', type=float, default='1.0',
                     help='Prob. margin for triplet loss')
 parser.add_argument('--emb-size', type=int, default=64, metavar='N',
