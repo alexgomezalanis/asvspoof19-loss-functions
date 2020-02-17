@@ -96,7 +96,7 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
       loss = criterion(output, target_device)
     elif args.loss_method.startswith('angular'):
       loss = criterion(embeddings, target_device)
-    elif args.loss_method == 'triplet':
+    elif args.loss_method == 'triplet' or args.loss_method == 'ge2e':
       loss = criterion(embeddings, target)
     loss.backward()
     optimizer.step()
@@ -122,7 +122,7 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
         test_loss += criterion(output, target_device).item() # sum up batch loss
       elif args.loss_method.startswith('angular'):
         test_loss += criterion(embeddings, target_device)
-      elif args.loss_method == 'triplet':
+      elif args.loss_method == 'triplet' or args.loss_method == 'ge2e':
         test_loss += criterion(embeddings, target)
 
   print('\nDevelopment loss: {:.4f}\n'.format(test_loss))
