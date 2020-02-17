@@ -57,7 +57,9 @@ parser.add_argument('--eval', default=True, type=lambda x: (str(x).lower() in ['
                     help='Whether to extract the xvectors')
 parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to train Logical or Physical Access')
-
+parser.add_argument('--num-classes', type=int, default=7, metavar='N',
+                    help='Number of training classes (2, 7, 10)')
+                    
 rootPath = os.getcwd()
                   
 if __name__ == '__main__':
