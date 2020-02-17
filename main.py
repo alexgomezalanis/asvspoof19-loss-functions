@@ -23,8 +23,8 @@ parser.add_argument('--num-data-workers', type=int, default=7,
                     help='How many processes to load data')
 parser.add_argument('--lr', type=float, default=3e-4, metavar='LR',
                     help='learning rate (default: 3e-4)')
-parser.add_argument('--version', type=int, default=1, metavar='S',
-                    help='Version of the implementation')
+parser.add_argument('--version', type=str, default='v1',
+                    help='Version to save the model')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=50, metavar='N',
@@ -59,7 +59,7 @@ parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in [
                     help='Whether to train Logical or Physical Access')
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
-                    
+
 rootPath = os.getcwd()
                   
 if __name__ == '__main__':
