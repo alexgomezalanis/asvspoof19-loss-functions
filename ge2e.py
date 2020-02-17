@@ -97,9 +97,6 @@ class GE2ELoss(nn.Module):
       row = [embeddings[i, :] for i in array]
       dvecs.append(torch.stack(row))
     dvecs = torch.stack(dvecs)
-
-    print('dvecs shape')
-    print(dvecs.shape)
     
     #Calculate centroids
     centroids = torch.mean(dvecs, 1)
