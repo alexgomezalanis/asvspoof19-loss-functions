@@ -77,9 +77,9 @@ if __name__ == '__main__':
   if args.loss_method == 'softmax':
     criterion = nn.CrossEntropyLoss()
   elif args.loss_method == 'angular_softmax_sphereface':
-    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, loss_type='sphereface')
+    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='sphereface')
   elif args.loss_method == 'angular_softmax_cosface':
-    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, loss_type='cosface')
+    criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='cosface')
 
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)
@@ -158,6 +158,6 @@ if __name__ == '__main__':
         device=device,
         mp=mp)
     
-    
+
   
   
