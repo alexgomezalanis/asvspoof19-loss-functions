@@ -82,13 +82,15 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
   pid = os.getpid()
   for batch_idx, sample in enumerate(data_loader):
     (stft, target, _) = sample
-    target = torch.LongTensor(target).to(device)
+    target_device = torch.LongTensor(target).to(device)
     stft = stft.to(device)
     optimizer.zero_grad()
     output, embeddings = model.forward(stft)
     if args.loss_method == 'softmax':
-      loss = criterion(output, target)
+      loss = criterion(output, target_device)
     elif args.loss_method.startswith('angular'):
+      loss = criterion(embeddings, target_device)
+    elif args.loss_method == 'triplet_loss':
       loss = criterion(embeddings, target)
     loss.backward()
     optimizer.step()
@@ -106,13 +108,15 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
   with torch.no_grad():
     for batch_idx, sample in enumerate(data_loader):
       (stft, target, _) = sample
-      target = torch.LongTensor(target).to(device)
+      target_device = torch.LongTensor(target).to(device)
       stft = stft.to(device)
       optimizer.zero_grad()
       output, embeddings = model.forward(stft)
       if args.loss_method == 'softmax':
-        test_loss += criterion(output, target).item() # sum up batch loss
+        test_loss += criterion(output, target_device).item() # sum up batch loss
       elif args.loss_method.startswith('angular'):
+        test_loss += criterion(embeddings, target_device)
+      elif args.loss_method == 'triplet_loss':
         test_loss += criterion(embeddings, target)
 
   print('\nDevelopment loss: {:.4f}\n'.format(test_loss))

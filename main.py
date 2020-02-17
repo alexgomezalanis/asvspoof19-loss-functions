@@ -9,6 +9,7 @@ from model import LCNN
 from train import train
 from eval import eval
 from angular_softmax_loss import AngularPenaltySMLoss
+from triplet_loss import TripletLoss
 #from kernel_density_loss import KernelDensityLoss
 from utils.checkpoint import load_checkpoint, create_directory
 
@@ -80,6 +81,8 @@ if __name__ == '__main__':
     criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='sphereface')
   elif args.loss_method == 'angular_softmax_cosface':
     criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='cosface')
+  elif args.loss_method == 'triplet_loss':
+    criterion = TripletLoss(margin=1.0)
 
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)
