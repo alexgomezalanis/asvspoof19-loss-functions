@@ -50,14 +50,14 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
   num_epochs_not_improving = 0
   best_dev_loss = float('Inf')
 
-  dev_loss = test_epoch(model, device, dev_loader, optimizer, criterion)
+  dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
 
   while num_epochs_not_improving < args.epochs:
     print('Epoch: ' + str(epoch))
     print('Bandwidth parameters')
     print(list(criterion.parameters()))
     train_epoch(epoch, args, model, device, train_loader, optimizer, criterion)
-    dev_loss = test_epoch(model, device, dev_loader, optimizer, criterion)
+    dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
 
     state = {
       'epoch': epoch,
@@ -85,8 +85,9 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
     (stft, target, _) = sample
     stft = stft.to(device)
     optimizer.zero_grad()
-    embeddings = model.forward(stft)
-    loss = criterion(embeddings, target)
+    output, embeddings = model.forward(stft)
+    if args.loss_method == 'softmax':
+      loss = criterion(output, target)
     loss.backward()
     optimizer.step()
 
@@ -96,7 +97,7 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
         100. * batch_idx / len(data_loader), loss.item()))
       sys.stdout.flush()
 
-def test_epoch(model, device, data_loader, optimizer, criterion):
+def test_epoch(args, model, device, data_loader, optimizer, criterion):
   model.eval()
   test_loss = 0
 
@@ -105,8 +106,9 @@ def test_epoch(model, device, data_loader, optimizer, criterion):
       (stft, target, _) = sample
       stft = stft.to(device)
       optimizer.zero_grad()
-      embeddings = model.forward(stft)
-      test_loss += criterion(embeddings, target)
+      output, embeddings = model.forward(stft)
+      if args.loss_method == 'softmax':
+        test_loss += criterion(output, target)
 
   test_loss /= len(data_loader.dataset)
 

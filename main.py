@@ -59,6 +59,8 @@ parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in [
                     help='Whether to train Logical or Physical Access')
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
+parser.add_argument('--loss-method', type=str, default='softmax',
+                    help='softmax, contrast, triplet or all')
 
 rootPath = os.getcwd()
                   
@@ -77,7 +79,7 @@ if __name__ == '__main__':
 
   # Model and xvectors path
   dirSpoof = 'LA' if args.is_la else 'PA'
-  dirEmbeddings = 'lcnn_' + args.version + '_emb_' + str(args.emb_size) + '_classes_' + str(args.num_classes)
+  dirEmbeddings = 'lcnn_' + args.version + '_loss_' + args.loss_method + '_emb_' + str(args.emb_size) + '_classes_' + str(args.num_classes)
 
   model_location = os.path.join(rootPath, 'models', dirSpoof, dirEmbeddings)
   create_directory(model_location)
