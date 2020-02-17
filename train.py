@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from dataset import LCNN_Dataset
-from sampler import CustomSampler
 
 rootPath = os.getcwd()
 root_dir = '/home2/alexgomezalanis/la-challenge/flac-files'
