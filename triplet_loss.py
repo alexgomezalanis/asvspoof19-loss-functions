@@ -19,7 +19,7 @@ class TripletLoss(nn.Module):
 
   def triplet_selector(self, embeddings, target):
     classes = np.unique(target)
-    digit_indices = [np.where(target == i)[0] for i in range(classes)]
+    digit_indices = [np.where(target == i) for i in range(classes)]
     anchor_indices = negative_indices = positive_indices = []
     for index_pos, arr_pos in enumerate(digit_indices):
       len_arr_pos = len(arr_pos)

@@ -81,7 +81,7 @@ if __name__ == '__main__':
     criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='sphereface')
   elif args.loss_method == 'angular_softmax_cosface':
     criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='cosface')
-  elif args.loss_method == 'triplet_loss':
+  elif args.loss_method == 'triplet':
     criterion = TripletLoss(margin=1.0)
 
   params = list(model.parameters()) + list(criterion.parameters())
