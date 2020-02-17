@@ -10,7 +10,7 @@ from train import train
 from eval import eval
 from angular_softmax_loss import AngularPenaltySMLoss
 from triplet_loss import TripletLoss
-#from kernel_density_loss import KernelDensityLoss
+from ge2e import GE2ELoss
 from utils.checkpoint import load_checkpoint, create_directory
 
 # Training settings
@@ -60,7 +60,7 @@ parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in [
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
 parser.add_argument('--loss-method', type=str, default='softmax',
-                    help='softmax, angular_softmax_sphereface, angular_softmax_cosface')
+                    help='softmax, angular_softmax_sphereface, angular_softmax_cosface, triplet, ge2e')
 
 rootPath = os.getcwd()
                   
@@ -83,6 +83,8 @@ if __name__ == '__main__':
     criterion = AngularPenaltySMLoss(in_features=args.emb_size, out_features=args.num_classes, device=device, loss_type='cosface')
   elif args.loss_method == 'triplet':
     criterion = TripletLoss(margin=1.0)
+  elif args.loss_method == 'ge2e':
+    criterion = GE2ELoss()
 
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)

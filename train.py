@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from dataset import LCNN_Dataset
+from sampler import CustomSampler
 
 rootPath = os.getcwd()
 root_dir = '/home2/alexgomezalanis/la-challenge/flac-files'
@@ -37,13 +38,18 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     dataset='development',
     num_classes=args.num_classes)
 
-  #train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
-  #dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False)
-
-  train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
-    num_workers=args.num_data_workers)
-  dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False,
-    num_workers=args.num_data_workers)
+  if args.loss_method == 'ge2e':
+    train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
+    dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
+      num_workers=args.num_data_workers, sampler=train_sampler)
+    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False,
+      num_workers=args.num_data_workers, sampler=dev_sampler)
+  else:
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
+      num_workers=args.num_data_workers)
+    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False,
+      num_workers=args.num_data_workers)
 
   epoch = best_epoch = start_epoch
   num_epochs_not_improving = 0
