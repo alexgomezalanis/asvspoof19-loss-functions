@@ -21,7 +21,9 @@ class TripletLoss(nn.Module):
     classes = np.unique(target)
     num_classes = len(classes)
     digit_indices = [np.where(target == i)[0] for i in classes]
-    anchor_indices = negative_indices = positive_indices = []
+    anchor_indices = []
+    negative_indices = []
+    positive_indices = []
     for index_pos, arr_pos in enumerate(digit_indices):
       len_arr_pos = len(arr_pos)
       for i in range(len_arr_pos):
