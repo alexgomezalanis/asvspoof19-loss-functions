@@ -57,6 +57,13 @@ class TripletLoss(nn.Module):
   def forward(self, embeddings, target, size_average=True):
     anchor_indices, positive_indices, negative_indices = self.triplet_selector(embeddings, target)
 
+    print('Anchor indices')
+    print(anchor_indices)
+    print('Positive indices')
+    print(positive_indices)
+    print('Negative indices')
+    print(negative_indices)
+
     loss = self.criterion(embeddings[anchor_indices], embeddings[positive_indices], embeddings[negative_indices])
 
     return loss
