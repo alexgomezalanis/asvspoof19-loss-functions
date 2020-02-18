@@ -9,7 +9,7 @@ from dataset import LCNN_Dataset
 
 rootPath = os.getcwd()
 
-def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db):
+def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db, loss_optimized):
   with torch.no_grad():
     for batch_idx, sample in enumerate(data_loader):
       (stft, labels, nameFiles) = sample
@@ -20,7 +20,8 @@ def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db
       labels = labels.numpy()
       for n, nameFile in enumerate(nameFiles):
         np.save(os.path.join(dirEmbeddings, db, db_set, 'S' + str(labels[n]), nameFile + '.npy'), embeddings[n])
-        np.save(os.path.join(dirSoftmax, db, db_set, 'S' + str(labels[n]), nameFile + '.npy'), softmax[n])
+        if loss_optimized == 'softmax':
+          np.save(os.path.join(dirSoftmax, db, db_set, 'S' + str(labels[n]), nameFile + '.npy'), softmax[n])
 
 # db: LA or PA -> Embeddings being evaluated
 # db_set: training, development or test -> Dataset to evaluate
@@ -51,7 +52,7 @@ def eval(protocol, db, db_set, embeddings_location, softmax_location, args, mode
     loader = DataLoader(dataset, batch_size=args.test_batch_size, shuffle=False,
       num_workers=args.num_data_workers)
 
-    process = mp.Process(target=test_epoch, args=(model, device, loader, db_set, embeddings_location, softmax_location, db))
+    process = mp.Process(target=test_epoch, args=(model, device, loader, db_set, embeddings_location, softmax_location, db, args.loss_method))
     process.start()
     processes.append(process)
   

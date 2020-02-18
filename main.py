@@ -19,8 +19,8 @@ parser.add_argument('--batch-size', type=int, default=210, metavar='N',
                     help='input batch size for training (default: 14)')
 parser.add_argument('--test-batch-size', type=int, default=50, metavar='N',
                     help='input batch size for testing (default: 14)')
-parser.add_argument('--epochs', type=int, default=3, metavar='N',
-                    help='number of epochs for early stopping (default: 15)')
+parser.add_argument('--epochs', type=int, default=5, metavar='N',
+                    help='number of epochs for early stopping (default: 5)')
 parser.add_argument('--num-data-workers', type=int, default=7,
                     help='How many processes to load data')
 parser.add_argument('--lr', type=float, default=3e-4, metavar='LR',
