@@ -14,7 +14,6 @@ def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db
     for batch_idx, sample in enumerate(data_loader):
       (stft, labels, nameFiles) = sample
       stft = stft.to(device)
-      #stft = torch.FloatTensor(stft).to(device)
       softmax, embeddings = model(stft)
       embeddings = embeddings.cpu().numpy()
       softmax = softmax.cpu().numpy()
@@ -28,9 +27,9 @@ def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db
 def eval(protocol, db, db_set, embeddings_location, softmax_location, args, model, device, mp):
   processes = []
 
-  df = pd.read_csv('/home2/alexgomezalanis/tdnn-asvspoof-2019/spoof/protocols/' + protocol, sep=' ')
+  df = pd.read_csv('./protocols/' + protocol, sep=' ')
   numRows = len(df.index)
-  rows_p = int(numRows / args.num_processes)
+  rows_p = numRows // args.num_processes
 
   for p in range(args.num_processes):
     if (p == args.num_processes - 1):

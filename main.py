@@ -31,8 +31,8 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=50, metavar='N',
                     help='how many batches to wait before logging training status')
-parser.add_argument('--num-processes', type=int, default=[1, 4], nargs="*",
-                    help='how many training processes to use (default: 5)')
+parser.add_argument('--num-processes', type=int, default=4, nargs="*",
+                    help='how many eval processes to use (default: 4)')
 parser.add_argument('--cuda', action='store_true', default=True,
                     help='enables CUDA training')
 parser.add_argument('--num-filts', type=int, default=256,
