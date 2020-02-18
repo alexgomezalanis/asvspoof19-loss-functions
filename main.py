@@ -84,7 +84,7 @@ if __name__ == '__main__':
   elif args.loss_method == 'triplet':
     criterion = TripletLoss(margin=1.0)
   elif args.loss_method == 'ge2e':
-    criterion = GE2ELoss()
+    criterion = GE2ELoss(device=device)
 
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)
