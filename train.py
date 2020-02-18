@@ -62,7 +62,8 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     #print('Criterion parameters')
     #print(list(criterion.parameters()))
     train_epoch(epoch, args, model, device, train_loader, optimizer, criterion)
-    dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
+    if args.loss_method != 'triplet':
+      dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
 
     state = {
       'epoch': epoch,
@@ -72,13 +73,16 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     }
     torch.save(state, model_location + '/epoch-' + str(epoch) + '.pt')
 
-    if best_dev_loss > dev_loss:
-      best_dev_loss = dev_loss
-      num_epochs_not_improving = 0
-      best_epoch = epoch
-      torch.save(state, model_location + '/best.pt')
+    if args.loss_method != 'triplet':
+      if best_dev_loss > dev_loss:
+        best_dev_loss = dev_loss
+        num_epochs_not_improving = 0
+        best_epoch = epoch
+        torch.save(state, model_location + '/best.pt')
+      else:
+        num_epochs_not_improving += 1
     else:
-      num_epochs_not_improving += 1
+      torch.save(state, model_location + '/best.pt')
     epoch += 1
 
   print('The best epoch is: ' + str(best_epoch))
