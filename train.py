@@ -55,7 +55,7 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
   num_epochs_not_improving = 0
   best_dev_loss = float('Inf')
 
-  dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
+  #dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)
 
   while num_epochs_not_improving < args.epochs:
     print('Epoch: ' + str(epoch))

@@ -97,6 +97,9 @@ class GE2ELoss(nn.Module):
       row = [embeddings[i, :] for i in array]
       dvecs.append(torch.stack(row))
     dvecs = torch.stack(dvecs)
+
+    print('Dvecs is cuda')
+    print(dvecs.is_cuda)
     
     #Calculate centroids
     centroids = torch.mean(dvecs, 1)
