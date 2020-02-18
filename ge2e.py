@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 
 class GE2ELoss(nn.Module):
-  def __init__(self, init_w=10.0, init_b=-5.0, loss_method='both'):
+  def __init__(self, device, init_w=10.0, init_b=-5.0, loss_method='both'):
     '''
     Implementation of the Generalized End-to-End loss defined in https://arxiv.org/abs/1710.10467 [1]
     Accepts an input of size (N, M, D)
@@ -16,8 +16,8 @@ class GE2ELoss(nn.Module):
         - init_b (float): definies the initial value of b in Equation (5) of [1]
     '''
     super(GE2ELoss, self).__init__()
-    self.w = nn.Parameter(torch.tensor(init_w))
-    self.b = nn.Parameter(torch.tensor(init_b))
+    self.w = nn.Parameter(torch.tensor(init_w)).to(device)
+    self.b = nn.Parameter(torch.tensor(init_b)).to(device)
     self.loss_method = loss_method
 
     assert self.loss_method in ['softmax', 'contrast', 'both']
