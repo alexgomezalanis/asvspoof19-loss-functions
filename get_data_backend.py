@@ -20,7 +20,7 @@ def get_data_backend(kind: str, path: str, args: dict) -> None:
     devIdentityVectors = []
     devLabels = []
     devLabelsBinary = []
-    fileNames = glob.glob(os.path.join(path, kind, 'S' + str(num_class) + '/*.npy'))
+    fileNames = glob.glob(os.path.join(path, db, kind, 'S' + str(num_class) + '/*.npy'))
 
     for utterance in range(len(fileNames)):
       ut = np.load(fileNames[utterance])
@@ -33,6 +33,6 @@ def get_data_backend(kind: str, path: str, args: dict) -> None:
     X_dev = np.asarray(devIdentityVectors)
     Y_dev = np.asarray(devLabels, dtype=np.int32)
     Y_binary_dev = np.asarray(devLabelsBinary, dtype=np.int32)
-    np.save(os.path.join(path, kind, 'X_' + str(num_class) + '.npy'), X_dev)
-    np.save(os.path.join(path, kind, 'Y_' + str(num_class) + '.npy'), Y_dev)
-    np.save(os.path.join(path, kind, 'Y_binary_' + str(num_class) + '.npy'), Y_binary_dev)
+    np.save(os.path.join(path, db, kind, 'X_' + str(num_class) + '.npy'), X_dev)
+    np.save(os.path.join(path, db, kind, 'Y_' + str(num_class) + '.npy'), Y_dev)
+    np.save(os.path.join(path, db, kind, 'Y_binary_' + str(num_class) + '.npy'), Y_binary_dev)
