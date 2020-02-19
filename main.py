@@ -119,47 +119,18 @@ if __name__ == '__main__':
 
     model, optimizer, criterion, eval_epoch = load_checkpoint(model, optimizer, criterion, path_model_location)
 
-    DICT_NUM_CLASSES = {
-      'LA': { 'training': 7, 'development': 7, 'test': 20 },
-      'PA': { 'training': 10, 'development': 10, 'test': 10 }
-    }
-    DICT_PROTOCOLS = {
-      'LA': { 'training': 'train_la.csv', 'development': 'dev_la.csv', 'test': 'eval_la.csv' },
-      'PA': { 'training': 'train_pa.csv', 'development': 'dev_pa.csv', 'test': 'eval_pa.csv'}
-    }
-
     embeddings_location = os.path.join(rootPath, 'embeddings_lcnn', dirSpoof, dirEmbeddings)
     softmax_location = os.path.join(rootPath, 'softmax_lcnn', dirSpoof, dirEmbeddings)
     # Create embeddings directories
     create_directory(embeddings_location)
     create_directory(softmax_location)
 
-    db = 'LA' if args.is_la else 'PA'
-    db_location = os.path.join(embeddings_location, db)
-    create_directory(db_location)
-    create_directory(os.path.join(softmax_location, db))
-
-    for db_set in ['training', 'development', 'test']:
-      set_location = os.path.join(db_location, db_set)
-      create_directory(set_location)
-      create_directory(os.path.join(softmax_location, db, db_set))
-      num_classes = DICT_NUM_CLASSES[db][db_set]
-      for n in range(num_classes):
-        class_location = os.path.join(set_location, 'S' + str(n))
-        create_directory(class_location)
-        create_directory(os.path.join(softmax_location, db, db_set, 'S' + str(n)))
-
-    for db_set in ['training', 'development', 'test']:
-      print('Eval embeddings ' + db + ' ' + db_set)
-      eval(
-        protocol=DICT_PROTOCOLS[db][db_set],
-        db=db,
-        db_set=db_set,
-        args=args,
-        model=model,
-        embeddings_location=embeddings_location,
-        softmax_location=softmax_location,
-        device=device)
+    eval(
+      args=args,
+      model=model,
+      embeddings_location=embeddings_location,
+      softmax_location=softmax_location,
+      device=device)
     
 
   
