@@ -4,7 +4,6 @@ import torch
 import os
 import torch.optim as optim
 import torch.nn as nn
-import torch.multiprocessing as mp
 from model import LCNN
 from train import train
 from eval import eval
@@ -154,14 +153,13 @@ if __name__ == '__main__':
       print('Eval embeddings ' + db + ' ' + db_set)
       eval(
         protocol=DICT_PROTOCOLS[db][db_set],
-        db=db, 
+        db=db,
         db_set=db_set,
         args=args,
         model=model,
         embeddings_location=embeddings_location,
         softmax_location=softmax_location,
-        device=device,
-        mp=mp)
+        device=device)
     
 
   
