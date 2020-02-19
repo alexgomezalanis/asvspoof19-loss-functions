@@ -136,7 +136,9 @@ if __name__ == '__main__':
       device=device)
 
   if args.backend:
+    print('Get data for backend')
     for kind in ['training', 'development', 'test']:
+      print(kind)
       get_data_backend(
         path=embeddings_location,
         kind=kind,
