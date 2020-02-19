@@ -59,7 +59,7 @@ def printScores(nameFiles, scores, text_file, target):
 
 def getLDAScores(X, Y):
   '''LDA SVD with covariance'''
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_' + dirIvectors + '_lda.txt'
+  CM_SCOREFILE = rootWrite + '/LA_LCNN_lda.txt'
   clf = LinearDiscriminantAnalysis(solver='svd', store_covariance=True)
   clf.fit(X, Y)
   text_file = open(CM_SCOREFILE, "w")
@@ -82,7 +82,7 @@ def getLDAScores(X, Y):
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
 def getSVMScores(X, Y_binary):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_' + dirIvectors + '_svm.txt'
+  CM_SCOREFILE = rootWrite + '/LA_LCNN_svm.txt'
   svm_clf = LinearSVC(C=10, loss="hinge")
   svm_clf.fit(X, Y_binary)
   text_file = open(CM_SCOREFILE, "w")
@@ -105,7 +105,7 @@ def getSVMScores(X, Y_binary):
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
 def getSVMOneScores(X_genuine, X_spoof):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_' + dirIvectors + '_svm_one.txt'
+  CM_SCOREFILE = rootWrite + '/LA_LCNN_svm_one.txt'
   clf_genuine = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
   clf_genuine.fit(X_genuine)
   clf_spoof = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
@@ -133,7 +133,7 @@ def getSVMOneScores(X_genuine, X_spoof):
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
 def getGMMScores(X_genuine, X_spoof):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_' + dirIvectors + '_gmm.txt'
+  CM_SCOREFILE = rootWrite + '/LA_LCNN_gmm.txt'
   text_file = open(CM_SCOREFILE, "w")
   clf_genuine = mixture.GaussianMixture(n_components=1)
   clf_genuine.fit(X_genuine)
