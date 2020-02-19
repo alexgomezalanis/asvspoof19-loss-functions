@@ -11,6 +11,7 @@ from angular_softmax_loss import AngularPenaltySMLoss
 from triplet_loss import TripletLoss
 from ge2e import GE2ELoss
 from utils.checkpoint import load_checkpoint, create_directory
+from get_data_backend import get_data_backend
 
 # Training settings
 parser = argparse.ArgumentParser(description='LCNN ASVspoof 2019')
@@ -54,6 +55,8 @@ parser.add_argument('--train', default=True, type=lambda x: (str(x).lower() in [
                     help='Whether to train the model')
 parser.add_argument('--eval', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to extract the xvectors')
+parser.add_argument('--backend', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+                    help='Whether to prepare embeddings for backend')
 parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to train Logical or Physical Access')
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
@@ -111,6 +114,12 @@ if __name__ == '__main__':
       model_location=model_location
     )
   
+  embeddings_location = os.path.join(rootPath, 'embeddings_lcnn', dirSpoof, dirEmbeddings)
+  softmax_location = os.path.join(rootPath, 'softmax_lcnn', dirSpoof, dirEmbeddings)
+  # Create embeddings directories
+  create_directory(embeddings_location)
+  create_directory(softmax_location)
+
   if args.eval:
     if args.eval_epoch != -1:
       path_model_location = os.path.join(model_location, 'epoch-' + str(args.eval_epoch) + '.pt')
@@ -119,18 +128,20 @@ if __name__ == '__main__':
 
     model, optimizer, criterion, eval_epoch = load_checkpoint(model, optimizer, criterion, path_model_location)
 
-    embeddings_location = os.path.join(rootPath, 'embeddings_lcnn', dirSpoof, dirEmbeddings)
-    softmax_location = os.path.join(rootPath, 'softmax_lcnn', dirSpoof, dirEmbeddings)
-    # Create embeddings directories
-    create_directory(embeddings_location)
-    create_directory(softmax_location)
-
     eval(
       args=args,
       model=model,
       embeddings_location=embeddings_location,
       softmax_location=softmax_location,
       device=device)
+
+  if args.backend:
+    for kind in ['training', 'development', 'test']:
+      get_data_backend(
+        path=embeddings_location,
+        kind=kind,
+        args=args
+      )
     
 
   
