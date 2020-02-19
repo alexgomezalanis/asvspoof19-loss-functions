@@ -35,7 +35,7 @@ def getEER(scores, labels, sign):
   return EER
 
 def getIdentityVectors(kind, num_class):
-  X_dev = np.load(root + '/identity-vectors/' + dirIvectors + '/' + kind + '/X_' + str(num_class) + '.npy')
+  X_dev = np.load(root + '/embeddings_lcnn/' + dirIvectors + '/' + kind + '/X_' + str(num_class) + '.npy')
   Y = num_class * np.ones((X_dev.shape[0]), dtype=np.int32)
   if (num_class == 0):
     Y_binary = np.zeros((X_dev.shape[0]), dtype=np.int32)
@@ -44,7 +44,7 @@ def getIdentityVectors(kind, num_class):
   return (X_dev, Y, Y_binary)
 
 def getFileNamesDev(num_class):
-  fileNames = glob.glob(root + '/identity-vectors/' + dirIvectors + '/test/S' + str(num_class) + '/*.npy')
+  fileNames = glob.glob(root + '/embeddings_lcnn/' + dirIvectors + '/test/S' + str(num_class) + '/*.npy')
   names = []
   for j in fileNames:
     fileNameParts = j.split('.')[0].split('/')
