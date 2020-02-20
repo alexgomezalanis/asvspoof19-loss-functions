@@ -28,7 +28,7 @@ class KernelDensityLoss(nn.Module):
     self.margin_triplet = torch.FloatTensor([margin_triplet])
     self.margin_triplet = self.margin_triplet.to(device)
 
-    assert self.loss_method in ['softmax', 'contrast', 'triplet', 'softmax-contrast', 'all']
+    assert self.loss_method in ['softmax', 'contrast', 'triplet', 'softmax_contrast', 'all']
 
     if self.loss_method == 'softmax':
       self.embed_loss = self.softmax_loss
@@ -154,7 +154,7 @@ class KernelDensityLoss(nn.Module):
 
     if self.loss_method == 'all':
       Loss = self.embed_loss(embeddings)
-    elif self.loss_method == 'softmax-contrast':
+    elif self.loss_method == 'softmax_contrast':
       Loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings)
     else:
       Loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
