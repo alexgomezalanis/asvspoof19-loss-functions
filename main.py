@@ -12,6 +12,7 @@ from triplet_loss import TripletLoss
 from ge2e import GE2ELoss
 from utils.checkpoint import load_checkpoint, create_directory
 from get_data_backend import get_data_backend
+from kde_loss import KernelDensityLoss
 
 # Training settings
 parser = argparse.ArgumentParser(description='LCNN ASVspoof 2019')
@@ -43,7 +44,7 @@ parser.add_argument('--window-length', type=float, default=0.025,
                     help='Window Length to compute STFT (s)')
 parser.add_argument('--frame-shift', type=float, default=0.010,
                     help='Frame Shift to compute STFT (s)')
-parser.add_argument('--margin-triplet', type=float, default='1.0',
+parser.add_argument('--margin-triplet', type=float, default=1.0,
                     help='Prob. margin for triplet loss')
 parser.add_argument('--emb-size', type=int, default=64, metavar='N',
                     help='embedding size')
@@ -62,7 +63,11 @@ parser.add_argument('--is-la', default=True, type=lambda x: (str(x).lower() in [
 parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
 parser.add_argument('--loss-method', type=str, default='softmax',
-                    help='softmax, angular_softmax_sphereface, angular_softmax_cosface, triplet, ge2e')
+                    help='softmax, angular_softmax_sphereface, angular_softmax_cosface, triplet, ge2e, kde-softmax, kde-contrast, kde-triplet, kde-all')
+parser.add_argument('--optimize-bandwidth', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+                    help='Whether to optimize the bandwidth of the KDE')
+parser.add_argument('--bandwidth', type=float, default=1.0,
+                    help='Initialization of KDE bandwidth. v1 -> False; v2 -> True')
 
 rootPath = os.getcwd()
                   
@@ -87,6 +92,15 @@ if __name__ == '__main__':
     criterion = TripletLoss(margin=1.0)
   elif args.loss_method == 'ge2e':
     criterion = GE2ELoss(device=device)
+  elif args.loss_method.startswith('kde'):
+    criterion = KernelDensityLoss(
+      emb_size=args.emb_size,
+      device=device,
+      loss_method=args.loss_method.split('-')[1],
+      init_bandwidth=args.bandwidth,
+      optimize_bandwidth=args.optimize_bandwidth,
+      margin_triplet=args.margin_triplet
+    )
 
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)

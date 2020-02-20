@@ -38,7 +38,7 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     dataset='development',
     num_classes=args.num_classes)
 
-  if args.loss_method == 'ge2e':
+  if args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
     train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
     dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
@@ -100,7 +100,7 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
       loss = criterion(output, target_device)
     elif args.loss_method.startswith('angular'):
       loss = criterion(embeddings, target_device)
-    elif args.loss_method == 'triplet' or args.loss_method == 'ge2e':
+    elif args.loss_method == 'triplet' or args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
       loss = criterion(embeddings, target)
     loss.backward()
     optimizer.step()
@@ -126,7 +126,7 @@ def test_epoch(args, model, device, data_loader, optimizer, criterion):
         test_loss += criterion(output, target_device).item() # sum up batch loss
       elif args.loss_method.startswith('angular'):
         test_loss += criterion(embeddings, target_device)
-      elif args.loss_method == 'triplet' or args.loss_method == 'ge2e':
+      elif args.loss_method == 'triplet' or args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
         test_loss += criterion(embeddings, target)
 
   print('\nDevelopment loss: {:.4f}\n'.format(test_loss))
