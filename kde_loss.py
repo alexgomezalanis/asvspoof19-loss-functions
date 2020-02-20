@@ -153,12 +153,10 @@ class KernelDensityLoss(nn.Module):
     self.log_probs = torch.stack(log_probs)
 
     if self.loss_method == 'all':
-      Loss = self.embed_loss(embeddings)
+      loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
     elif self.loss_method == 'softmax_contrast':
-      Loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings)
+      loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings)
     else:
-      Loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
+      loss = self.embed_loss(embeddings)
 
-    #print(Loss)
-
-    return Loss
+    return loss
