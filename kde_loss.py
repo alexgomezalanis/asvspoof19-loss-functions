@@ -152,7 +152,8 @@ class KernelDensityLoss(nn.Module):
       #cov_matrix = variance * torch.eye(self.emb_size)
       #cov_matrix = cov_matrix.to(self.device)
       for n in arr:
-        self.distributions[index_class].append(MultivariateNormal(embeddings[n], self.cov_matrix))
+        dist = torch.tensor(MultivariateNormal(embeddings[n], self.cov_matrix)).to(self.device)
+        self.distributions[index_class].append(dist)
     
     print('Distributions shape')
     print(len(self.distributions))
