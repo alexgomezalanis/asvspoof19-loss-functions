@@ -87,14 +87,14 @@ class KernelDensityLoss(nn.Module):
 
     ### WARNING ###
     # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
-    L = []
-    for j in range(N):
+    L = [-self.softmax(self.log_probs[j,i])[j] for i in range(M) for j in range M]
+    '''for j in range(N):
       L_row = []
       for i in range(M):
         L_row.append(-self.softmax(self.log_probs[j,i])[j])
         #L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
-      L.append(L_row)
+      L.append(L_row)'''
     L_torch = torch.stack(L)
     return F.relu(L_torch).sum()
 
