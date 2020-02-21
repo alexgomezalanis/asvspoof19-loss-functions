@@ -27,6 +27,7 @@ class KernelDensityLoss(nn.Module):
     self.loss_method = loss_method
     self.margin_triplet = torch.FloatTensor([margin_triplet])
     self.margin_triplet = self.margin_triplet.to(device)
+    self.softmax = m = nn.LogSoftmax(dim=0)
 
     assert self.loss_method in ['softmax', 'contrast', 'triplet', 'softmax_contrast', 'all']
 
@@ -90,7 +91,7 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        L_row.append(-nn.LogSoftmax(self.log_probs[j,i], 0)[j])
+        L_row.append(-self.softmax(self.log_probs[j,i])[j])
         #L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
       L.append(L_row)
