@@ -151,6 +151,8 @@ class KernelDensityLoss(nn.Module):
       probs_row = torch.stack(probs_row)
       log_probs.append(probs_row)
     self.log_probs = torch.stack(log_probs)
+    print('Log probs shape')
+    print(self.log_probs.shape)
 
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
