@@ -90,7 +90,8 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
+        L_row.append(-nn.LogSoftmax(self.log_probs[j,i], 0)[j])
+        #L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
