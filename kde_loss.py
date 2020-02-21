@@ -142,7 +142,7 @@ class KernelDensityLoss(nn.Module):
     #for i in range(self.num_classes):
     #  torch.clamp(self.variances[i], 1e-6)
   
-    self.cov_matrix = self.variance * torch.eye(self.emb_size, require_grad=False)
+    self.cov_matrix = self.variance * torch.eye(self.emb_size, requires_grad=False)
     self.cov_matrix = self.cov_matrix.to(self.device)
 
     self.distributions = []
