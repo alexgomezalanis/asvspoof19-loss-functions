@@ -85,7 +85,7 @@ class KernelDensityLoss(nn.Module):
     # N spoofing classes, M utterances per class
     N, M, _ = list(self.log_probs.size())
 
-    softmax_loss = 0
+    '''softmax_loss = 0
     for j in range(N):
       for i in range(M):
         softmax = -F.log_softmax(self.log_probs[j,i], 0)[j]
@@ -94,20 +94,25 @@ class KernelDensityLoss(nn.Module):
 
     print('Softmax loss')
     print(softmax_loss)
-    return softmax_loss
+    return softmax_loss'''
 
     ### WARNING ###
     # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
     #L = [-self.softmax(self.log_probs[j,i])[j] for i in range(M) for j in range(N)]
-    '''for j in range(N):
+    L = []
+    for j in range(N):
       L_row = []
       for i in range(M):
         L_row.append(-self.softmax(self.log_probs[j,i])[j])
         #L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
-      L.append(L_row)'''
-    #L_torch = torch.stack(L)
-    #return F.relu(L_torch).sum()
+      L.append(L_row)
+    L_torch = torch.stack(L)
+    softmax_loss = F.relu(L_torch).sum()
+
+    print('Softmax loss')
+    print(softmax_loss)
+    return softmax_loss
 
   def contrast_loss(self, embeddings):
     # N spoofing classes, M utterances per class
