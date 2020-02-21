@@ -137,7 +137,7 @@ class KernelDensityLoss(nn.Module):
         self.distributions[index_class].append(MultivariateNormal(embeddings[n], self.cov_matrix))
     
     print('Distributions shape')
-    print(self.distributions.shape)
+    print(len(self.distributions))
     
     log_probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
