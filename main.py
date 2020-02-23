@@ -4,6 +4,7 @@ import torch
 import os
 import torch.optim as optim
 import torch.nn as nn
+import torch.multiprocessing as mp
 from model import LCNN
 from train import train
 from eval import eval
@@ -77,6 +78,7 @@ if __name__ == '__main__':
 
   use_cuda = args.cuda and torch.cuda.is_available()
   device = torch.device("cuda" if use_cuda else "cpu")
+  mp.set_start_method('spawn')
 
   torch.manual_seed(args.seed)
 
@@ -147,7 +149,8 @@ if __name__ == '__main__':
       model=model,
       embeddings_location=embeddings_location,
       softmax_location=softmax_location,
-      device=device)
+      device=device,
+      mp=mp)
 
   if args.backend:
     print('Get data for backend')

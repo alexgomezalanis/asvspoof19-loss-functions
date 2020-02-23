@@ -4,7 +4,6 @@ import torch
 import numpy as np
 import argparse
 import pandas as pd
-import torch.multiprocessing as mp
 from torch.utils.data import DataLoader
 from dataset import LCNN_Dataset
 from utils.checkpoint import create_directory
@@ -37,9 +36,8 @@ def test_epoch(model, device, data_loader, db_set, dirEmbeddings, dirSoftmax, db
 
 # db: LA or PA -> Embeddings being evaluated
 # db_set: training, development or test -> Dataset to evaluate
-def eval(embeddings_location, softmax_location, args, model, device):
+def eval(embeddings_location, softmax_location, args, model, device, mp):
   model.eval()
-  mp.set_start_method('spawn')
 
   db = 'LA' if args.is_la else 'PA'
   db_location = os.path.join(embeddings_location, db)
