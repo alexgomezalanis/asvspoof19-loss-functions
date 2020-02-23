@@ -102,8 +102,6 @@ def train_epoch(epoch, args, model, device, data_loader, optimizer, criterion):
       loss = criterion(embeddings, target_device)
     elif args.loss_method == 'triplet' or args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
       loss = criterion(embeddings, target)
-    print('Optimizing')
-    sys.stdout.flush()
     loss.backward()
     optimizer.step()
 
