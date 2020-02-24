@@ -28,7 +28,7 @@ def getEER(scores, labels, sign):
   return EER
 
 def getSoftmaxScores(kind, num_class):
-  X_dev = np.load(root + '/softmax_lcnn/' + dirIvectors + '/' + kind + '/X_softmax_' + str(num_class) + '.npy')
+  X_dev = np.load(root + '/softmax_lcnn/' + dirIvectors + '/' + kind + '/X_' + str(num_class) + '.npy')
   Y = num_class * np.ones((X_dev.shape[0]), dtype=np.int32)
   if (num_class == 0):
     Y_binary = np.zeros((X_dev.shape[0]), dtype=np.int32)
