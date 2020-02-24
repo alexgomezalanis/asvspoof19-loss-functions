@@ -13,6 +13,7 @@ from triplet_loss import TripletLoss
 from ge2e import GE2ELoss
 from utils.checkpoint import load_checkpoint, create_directory
 from get_data_backend import get_data_backend
+from get_data_softmax import get_data_softmax
 from kde_loss import KernelDensityLoss
 
 # Training settings
@@ -161,12 +162,16 @@ if __name__ == '__main__':
         kind=kind,
         args=args
       )
-      if args.loss_method == 'softmax':
-        get_data_backend(
-          path=softmax_location,
-          kind=kind,
-          args=args
-        )
+
+  if args.loss_method == 'softmax':
+    print('Get softmax scores')
+    for kind in ['training', 'development', 'test']:
+      print(kind)
+      get_data_softmax(
+        path=softmax_location,
+        kind=kind,
+        args=args
+      )
     
 
   
