@@ -161,6 +161,12 @@ if __name__ == '__main__':
         kind=kind,
         args=args
       )
+      if args.loss_method == 'softmax':
+        get_data_backend(
+          path=softmax_location,
+          kind=kind,
+          args=args
+        )
     
 
   
