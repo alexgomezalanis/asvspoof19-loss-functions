@@ -2,7 +2,6 @@ import numpy as np
 import sys
 import glob
 import os
-import copy
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.externals import joblib
 from sklearn.pipeline import Pipeline
@@ -58,9 +57,9 @@ def printScores(nameFiles, scores, text_file, target):
     score = scores[i].tolist()[0] if isinstance(scores[i], np.ndarray) else scores[i]
     text_file.write("%s %s %f \n" % (nameFiles[i], target, score))
 
-def getLDAScores(X, Y):
+def getLDAScores(X, Y, isLA):
   '''LDA SVD with covariance'''
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_lda.txt'
+  CM_SCOREFILE = rootWrite + '/' + dirSpoof + '_LCNN_lda.txt'
   clf = LinearDiscriminantAnalysis(solver='svd', store_covariance=True)
   clf.fit(X, Y)
   text_file = open(CM_SCOREFILE, "w")
@@ -68,22 +67,32 @@ def getLDAScores(X, Y):
   fileNames = getFileNamesDev(0)
   scores = clf.decision_function(z_genuine)
   printScores(fileNames, scores, text_file, 'bonafide')
-  for i in range(7, 20):
-    z_spoof, Y_spoof, _ = getIdentityVectors('test', i)
-    fileNames = getFileNamesDev(i)
+  if isLA:
+    for i in range(7, 20):
+      z_spoof, Y_spoof, _ = getIdentityVectors('test', i)
+      fileNames = getFileNamesDev(i)
+      scores = clf.decision_function(z_spoof)
+      printScores(fileNames, scores, text_file, 'spoof')
+      z = np.concatenate((z_genuine, z_spoof))
+      y = np.concatenate((Y_genuine, Y_spoof))
+      scoresEER = clf.decision_function(z)
+      print('S' + str(i) + ': ')
+      print(getEER(scoresEER, y, 1))
+  else:
+    z_spoof, Y_spoof, _ = getIdentityVectors('test', 1)
+    fileNames = getFileNamesDev(1)
     scores = clf.decision_function(z_spoof)
     printScores(fileNames, scores, text_file, 'spoof')
     z = np.concatenate((z_genuine, z_spoof))
     y = np.concatenate((Y_genuine, Y_spoof))
     scoresEER = clf.decision_function(z)
-    print('S' + str(i) + ': ')
-    print(getEER(scoresEER, y, 1))
+    print(getEER(scoresEER, y, -1))
   text_file.close()
   print("%%% LDA %%%")
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
-def getSVMScores(X, Y_binary):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_svm.txt'
+def getSVMScores(X, Y_binary, isLA):
+  CM_SCOREFILE = rootWrite + '/' + dirSpoof + '_LCNN_svm.txt'
   svm_clf = LinearSVC(C=10, loss="hinge")
   svm_clf.fit(X, Y_binary)
   text_file = open(CM_SCOREFILE, "w")
@@ -91,22 +100,32 @@ def getSVMScores(X, Y_binary):
   fileNames = getFileNamesDev(0)
   scores = -1 * svm_clf.decision_function(z_genuine)
   printScores(fileNames, scores, text_file, 'bonafide')
-  for i in range(7, 20):
-    z_spoof, _, Y_spoof = getIdentityVectors('test', i)
-    fileNames = getFileNamesDev(i)
+  if isLA:
+    for i in range(7, 20):
+      z_spoof, _, Y_spoof = getIdentityVectors('test', i)
+      fileNames = getFileNamesDev(i)
+      scores = -1 * svm_clf.decision_function(z_spoof)
+      printScores(fileNames, scores, text_file, 'spoof')
+      z = np.concatenate((z_spoof, z_genuine))
+      y = np.concatenate((Y_spoof, Y_genuine))
+      scoresEER = -1 * svm_clf.decision_function(z)
+      print('S' + str(i) + ': ')
+      print(getEER(scoresEER, y, 1))
+  else:
+    z_spoof, Y_spoof, _ = getIdentityVectors('test', 1)
+    fileNames = getFileNamesDev(1)
     scores = -1 * svm_clf.decision_function(z_spoof)
     printScores(fileNames, scores, text_file, 'spoof')
-    z = np.concatenate((z_spoof, z_genuine))
-    y = np.concatenate((Y_spoof, Y_genuine))
+    z = np.concatenate((z_genuine, z_spoof))
+    y = np.concatenate((Y_genuine, Y_spoof))
     scoresEER = -1 * svm_clf.decision_function(z)
-    print('S' + str(i) + ': ')
-    print(getEER(scoresEER, y, 1))
+    print(getEER(scoresEER, y, -1))
   text_file.close()
   print("%%% SVM %%%")
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
-def getSVMOneScores(X_genuine, X_spoof):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_svm_one.txt'
+def getSVMOneScores(X_genuine, X_spoof, isLA):
+  CM_SCOREFILE = rootWrite + '/' + dirSpoof + '_LCNN_svm_one.txt'
   clf_genuine = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
   clf_genuine.fit(X_genuine)
   clf_spoof = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)
@@ -118,23 +137,34 @@ def getSVMOneScores(X_genuine, X_spoof):
   prob_gen_spoof = clf_spoof.score_samples(z_genuine)
   scores_genuine = prob_gen_genuine - prob_gen_spoof
   printScores(fileNames, scores_genuine, text_file, 'bonafide')
-  for i in range(7, 20):
-    z_spoof, _, y_spoof = getIdentityVectors('test', i)
-    fileNames = getFileNamesDev(i)
+  if isLA:
+    for i in range(7, 20):
+      z_spoof, _, y_spoof = getIdentityVectors('test', i)
+      fileNames = getFileNamesDev(i)
+      prob_spoof_genuine = clf_genuine.score_samples(z_spoof)
+      prob_spoof_spoof = clf_spoof.score_samples(z_spoof)
+      scores_spoof = prob_spoof_genuine - prob_spoof_spoof
+      printScores(fileNames, scores_spoof, text_file, 'spoof')
+      scores = np.concatenate((scores_genuine, scores_spoof))
+      y = np.concatenate((y_genuine, y_spoof))
+      print('S' + str(i) + ': ')
+      print(getEER(scores, y, 1))
+  else:
+    z_spoof, _, y_spoof = getIdentityVectors('test', 1)
+    fileNames = getFileNamesDev(1)
     prob_spoof_genuine = clf_genuine.score_samples(z_spoof)
     prob_spoof_spoof = clf_spoof.score_samples(z_spoof)
     scores_spoof = prob_spoof_genuine - prob_spoof_spoof
     printScores(fileNames, scores_spoof, text_file, 'spoof')
     scores = np.concatenate((scores_genuine, scores_spoof))
     y = np.concatenate((y_genuine, y_spoof))
-    print('S' + str(i) + ': ')
-    print(getEER(scores, y, 1))
+    print(getEER(scores, y, -1))
   text_file.close()
   print("%%% SVM ONE %%%")
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
-def getGMMScores(X_genuine, X_spoof):
-  CM_SCOREFILE = rootWrite + '/LA_LCNN_gmm.txt'
+def getGMMScores(X_genuine, X_spoof, isLA):
+  CM_SCOREFILE = rootWrite + '/' + dirSpoof + '_LCNN_gmm.txt'
   text_file = open(CM_SCOREFILE, "w")
   clf_genuine = mixture.GaussianMixture(n_components=1)
   clf_genuine.fit(X_genuine)
@@ -146,30 +176,45 @@ def getGMMScores(X_genuine, X_spoof):
   prob_gen_spoof = clf_spoof.score_samples(z_genuine)
   scores_genuine = prob_gen_genuine - prob_gen_spoof
   printScores(fileNames, scores_genuine, text_file, 'bonafide')
-  for i in range(7, 20):
-    z_spoof, _, y_spoof = getIdentityVectors('test', i)
-    fileNames = getFileNamesDev(i)
+  if isLA:
+    for i in range(7, 20):
+      z_spoof, _, y_spoof = getIdentityVectors('test', i)
+      fileNames = getFileNamesDev(i)
+      prob_spoof_genuine = clf_genuine.score_samples(z_spoof)
+      prob_spoof_spoof = clf_spoof.score_samples(z_spoof)
+      scores_spoof = prob_spoof_genuine - prob_spoof_spoof
+      printScores(fileNames, scores_spoof, text_file, 'spoof')
+      scores = np.concatenate((scores_genuine, scores_spoof))
+      y = np.concatenate((y_genuine, y_spoof))
+      print('S' + str(i) + ': ')
+      print(getEER(scores, y, 1))
+  else:
+    z_spoof, _, y_spoof = getIdentityVectors('test', 1)
+    fileNames = getFileNamesDev(1)
     prob_spoof_genuine = clf_genuine.score_samples(z_spoof)
     prob_spoof_spoof = clf_spoof.score_samples(z_spoof)
     scores_spoof = prob_spoof_genuine - prob_spoof_spoof
     printScores(fileNames, scores_spoof, text_file, 'spoof')
     scores = np.concatenate((scores_genuine, scores_spoof))
     y = np.concatenate((y_genuine, y_spoof))
-    print('S' + str(i) + ': ')
-    print(getEER(scores, y, 1))
+    print(getEER(scores, y, -1))
   text_file.close()
   print("%%% GMM %%%")
   results = eng.evaluate_tDCF_asvspoof19(CM_SCOREFILE, ASV_SCOREFILE)
 
 classifier = sys.argv[1] # lda, svm, svm-one, gmm
 dirIvectors = sys.argv[2] # softmax, siamese_softmax
+numTrainingClasses = int(sys.argv[3]) # 2, 7, 10
+isLA = sys.argv[4] == 'True' # True for LA and False for PA
 root = os.getcwd()
 rootWrite= '/home2/alexgomezalanis/tDCF_v1/scores'
 ASV_SCOREFILE = rootWrite + '/asv_test.txt'
 
+dirSpoof = 'LA' if isLA else 'PA'
+
 X, Y, Y_binary = getIdentityVectors('training', 0)
-X_genuine = copy.deepcopy(X)
-for i in range(1, 7):
+X_genuine = X
+for i in range(1, numTrainingClasses):
   X_class, Y_class, Y_binary_class = getIdentityVectors('training', i)
   X = np.concatenate((X, X_class))
   Y = np.concatenate((Y, Y_class))
@@ -177,7 +222,7 @@ for i in range(1, 7):
 
 X_class, Y_class, Y_binary_class = getIdentityVectors('training', 1)
 X_spoof = X_class
-for i in range(2, 7):
+for i in range(2, numTrainingClasses):
   X_class, Y_class, Y_binary_class = getIdentityVectors('training', i)
   X_spoof = np.concatenate((X_spoof, X_class))
 
@@ -190,13 +235,13 @@ eng.addpath(genpath)
 print("Classifier")
 if (classifier == 'lda'):
   print("LDA")
-  getLDAScores(X, Y)
+  getLDAScores(X, Y, isLA)
 elif (classifier == 'svm'):
   print("SVM")
-  getSVMScores(X, Y_binary)
+  getSVMScores(X, Y_binary, isLA)
 elif (classifier == 'svm-one'):
   print("SVM-ONE")
-  getSVMOneScores(X_genuine, X_spoof)
+  getSVMOneScores(X_genuine, X_spoof, isLA)
 elif (classifier == 'gmm'):
   print("GMM")
-  getGMMScores(X_genuine, X_spoof)
+  getGMMScores(X_genuine, X_spoof, isLA)
