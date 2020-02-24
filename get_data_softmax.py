@@ -28,8 +28,8 @@ def get_data_softmax(kind: str, path: str, args: dict) -> None:
       ut = np.load(fileNames[utterance])
       score = F.softmax(torch.from_numpy(np.reshape(ut, (1, -1))), dim=1)[0, 0].numpy()
       devScores.append(score)
-      devLabels.append(i)
-      if (i == 0):
+      devLabels.append(num_class)
+      if (num_class == 0):
         devLabelsBinary.append(0)
       else:
         devLabelsBinary.append(1)
