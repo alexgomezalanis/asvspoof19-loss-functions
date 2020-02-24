@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import glob
 import os
+import copy
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.externals import joblib
 from sklearn.pipeline import Pipeline
@@ -167,7 +168,7 @@ rootWrite= '/home2/alexgomezalanis/tDCF_v1/scores'
 ASV_SCOREFILE = rootWrite + '/asv_test.txt'
 
 X, Y, Y_binary = getIdentityVectors('training', 0)
-X_genuine = X
+X_genuine = copy.deepcopy(X)
 for i in range(1, 7):
   X_class, Y_class, Y_binary_class = getIdentityVectors('training', i)
   X = np.concatenate((X, X_class))
