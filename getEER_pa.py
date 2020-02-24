@@ -170,16 +170,11 @@ ASV_SCOREFILE = rootWrite + '/asv_test.txt'
 X, Y, Y_binary = getIdentityVectors('training', 0)
 X_genuine = copy.deepcopy(X)
 #for i in range(1, 7):
-#  X_class, Y_class, Y_binary_class = getIdentityVectors('training', i)
-#  X = np.concatenate((X, X_class))
-#  Y = np.concatenate((Y, Y_class))
-#  Y_binary = np.concatenate((Y_binary, Y_binary_class))
-
 X_class, Y_class, Y_binary_class = getIdentityVectors('training', 1)
-X_spoof = X_class
-#for i in range(2, 7):
-#  X_class, Y_class, Y_binary_class = getIdentityVectors('training', i)
-#  X_spoof = np.concatenate((X_spoof, X_class))
+X_spoof = copy.deepcopy(X_class)
+X = np.concatenate((X, X_class))
+Y = np.concatenate((Y, Y_class))
+Y_binary = np.concatenate((Y_binary, Y_binary_class))
 
 eng = matlab.engine.start_matlab()
 genpath = eng.genpath('/home2/alexgomezalanis/tDCF_v1/bosaris_toolkit.1.06/bosaris_toolkit')
