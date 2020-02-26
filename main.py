@@ -104,7 +104,8 @@ if __name__ == '__main__':
       loss_method=args.loss_method.split('-')[1],
       init_bandwidth=args.bandwidth,
       optimize_bandwidth=args.optimize_bandwidth,
-      margin_triplet=args.margin_triplet
+      margin_triplet=args.margin_triplet,
+      num_classes=args.num_classes
     )
 
   params = list(model.parameters()) + list(criterion.parameters())

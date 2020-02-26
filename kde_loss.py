@@ -11,7 +11,7 @@ class KernelDensityLoss(nn.Module):
   Takes a batch of embeddings and corresponding labels.
   """
 
-  def __init__(self, device, emb_size=64, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True):
+  def __init__(self, device, emb_size=64, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
       self.variance = nn.Parameter(torch.tensor(init_bandwidth))
@@ -23,11 +23,10 @@ class KernelDensityLoss(nn.Module):
     self.log_probs = []
     self.digit_indices = []
     self.device = device
-    self.num_classes = 7
+    self.num_classes = num_classes
     self.loss_method = loss_method
     self.margin_triplet = torch.FloatTensor([margin_triplet])
     self.margin_triplet = self.margin_triplet.to(device)
-    self.softmax = m = nn.LogSoftmax(dim=0)
 
     assert self.loss_method in ['softmax', 'contrast', 'triplet', 'softmax_contrast', 'all']
 
@@ -103,15 +102,12 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        L_row.append(-self.softmax(self.log_probs[j,i])[j])
-        #L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
+        L_row.append(-F.log_softmax(self.log_probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
     softmax_loss = F.relu(L_torch).sum()
 
-    print('Softmax loss')
-    print(softmax_loss)
     return softmax_loss
 
   def contrast_loss(self, embeddings):
@@ -154,9 +150,6 @@ class KernelDensityLoss(nn.Module):
       for n in arr:
         self.distributions[index_class].append(MultivariateNormal(embeddings[n], self.cov_matrix))
     
-    print('Distributions shape')
-    print(len(self.distributions))
-    
     log_probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
       probs_row = []
@@ -172,8 +165,6 @@ class KernelDensityLoss(nn.Module):
       probs_row = torch.stack(probs_row)
       log_probs.append(probs_row)
     self.log_probs = torch.stack(log_probs)
-    print('Log probs shape')
-    print(self.log_probs.shape)
 
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
