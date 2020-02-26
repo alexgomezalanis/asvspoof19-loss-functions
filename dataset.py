@@ -26,7 +26,8 @@ class LCNN_Dataset(Dataset):
     dataset,
     is_evaluating_la,
     num_classes,
-    dataframe=None):
+    dataframe=None,
+    normalize=False):
     """
     Args:
         csv_file (string): Path to the csv file with annotations.
@@ -48,6 +49,7 @@ class LCNN_Dataset(Dataset):
     self.dataset = dataset
     self.is_evaluating_la = is_evaluating_la
     self.num_classes = num_classes
+    self.normalize = normalize
 
   def __len__(self):
     return len(self.wavfiles_frame)
@@ -100,9 +102,10 @@ class LCNN_Dataset(Dataset):
     else:
       stft = feat[:, :self.n_frames]
 
-    #median = np.mean(stft, axis=1)
-    #std = np.std(stft, axis=1)
-    #stft = (np.transpose(stft) - median) / std
+    if self.normalize:
+      median = np.mean(stft, axis=1)
+      std = np.std(stft, axis=1)
+      stft = (np.transpose(stft) - median) / std
     stft = np.reshape(stft, (1, self.n_filts, self.n_frames))
 
     sample = (stft, target, nameFile)

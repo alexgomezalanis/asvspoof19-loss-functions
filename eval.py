@@ -77,7 +77,8 @@ def eval(embeddings_location, softmax_location, args, model, device, mp):
         dataset=db_set,
         is_evaluating_la=db == 'LA',    # Embeddings to evaluate
         dataframe=df_p,
-        num_classes=args.num_classes)
+        num_classes=args.num_classes,
+        normalize=args.normalize)
     
       loader = DataLoader(dataset, batch_size=args.test_batch_size, shuffle=False,
         num_workers=args.num_data_workers)

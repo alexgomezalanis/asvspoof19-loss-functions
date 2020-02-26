@@ -25,7 +25,8 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     shift=args.frame_shift,
     is_evaluating_la=args.is_la,
     dataset='training',
-    num_classes=args.num_classes)
+    num_classes=args.num_classes,
+    normalize=args.normalize)
 
   dev_dataset = LCNN_Dataset(
     csv_file='./protocols/' + dev_protocol,
@@ -36,7 +37,8 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     shift=args.frame_shift,
     is_evaluating_la=args.is_la,
     dataset='development',
-    num_classes=args.num_classes)
+    num_classes=args.num_classes,
+    normalize=args.normalize)
 
   if args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
     train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
