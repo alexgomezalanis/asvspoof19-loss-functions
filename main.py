@@ -70,7 +70,7 @@ parser.add_argument('--optimize-bandwidth', default=True, type=lambda x: (str(x)
                     help='Whether to optimize the bandwidth of the KDE')
 parser.add_argument('--bandwidth', type=float, default=1.0,
                     help='Initialization of KDE bandwidth. v1 -> False; v2 -> True')
-parser.add_argument('--normalize', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+parser.add_argument('--normalize', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to normalize the utterance: mean and variance normalization')
 
 rootPath = os.getcwd()
