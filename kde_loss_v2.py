@@ -108,13 +108,13 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        L_row.append(F.log_softmax(self.probs[j,i], 0)[j])
+        L_row.append(-F.log_softmax(self.probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
-    softmax_loss = F.relu(L_torch).sum()
+    #softmax_loss = F.relu(L_torch).sum()
 
-    return softmax_loss
+    return L_torch.sum()
 
   def contrast_loss(self, embeddings):
     # N spoofing classes, M utterances per class
@@ -159,7 +159,9 @@ class KernelDensityLoss(nn.Module):
       probs_row = torch.stack(probs_row)
       probs.append(probs_row)
     self.probs = torch.stack(probs)
-    self.probs = self.probs * self.w + self.b
+
+    torch.clamp(self.w, 1e-6)
+    self.probs = self.w * self.probs + self.b
     print(self.probs)
     print(self.probs.size())
 
