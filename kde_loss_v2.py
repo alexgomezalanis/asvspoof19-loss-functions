@@ -11,7 +11,7 @@ class KernelDensityLoss(nn.Module):
   Takes a batch of embeddings and corresponding labels.
   """
 
-  def __init__(self, device, emb_size=64, init_w=10.0, init_b=-1.0, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
+  def __init__(self, device, emb_size=64, init_w=10.0, init_b=0.1, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
       self.variance = nn.Parameter(torch.tensor(init_bandwidth))
