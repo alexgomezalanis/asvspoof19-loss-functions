@@ -11,16 +11,18 @@ class KernelDensityLoss(nn.Module):
   Takes a batch of embeddings and corresponding labels.
   """
 
-  def __init__(self, device, emb_size=64, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
+  def __init__(self, device, emb_size=64, init_w=10.0, init_b=-5.0, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
       self.variance = nn.Parameter(torch.tensor(init_bandwidth))
     else:
       self.variance = torch.tensor(init_bandwidth)
-    #self.variances = nn.Parameter(torch.tensor(7 * [init_bandwidth]))
+    self.w = nn.Parameter(torch.tensor(init_w)).to(device)
+    self.b = nn.Parameter(torch.tensor(init_b)).to(device)
+
     self.emb_size = emb_size
     self.distributions = []
-    self.log_probs = []
+    self.probs = []
     self.digit_indices = []
     self.device = device
     self.num_classes = num_classes
@@ -38,15 +40,15 @@ class KernelDensityLoss(nn.Module):
       self.embed_loss = self.triplet_loss
 
   def get_log_prob(self, index_utt, index_class):
-    log_probs = []
+    probs = []
     n = 0
     for j in self.digit_indices[index_class]:
       if index_utt != j:
         index_i = min(index_utt, j)
         index_j = max(index_utt, j)
-        log_probs.append(self.distances[index_i][index_j])
+        probs.append(self.distances[index_i][index_j])
         n += 1
-    return torch.sum(torch.stack(log_probs)) / n
+    return torch.sum(torch.stack(probs)) / n
 
   def triplet_loss(self, embeddings):    
     negative_probs = []
@@ -54,7 +56,7 @@ class KernelDensityLoss(nn.Module):
     for index_pos, arr_pos in enumerate(self.digit_indices):
       len_arr_pos = len(arr_pos)
       for pos_idx in range(len_arr_pos):
-        pos_prob = self.log_probs[index_pos,pos_idx,index_pos]
+        pos_prob = self.probs[index_pos,pos_idx,index_pos]
         positive_probs.append(pos_prob)
         # Choose randomly a negative sample which lies inside the margin
         neg_classes = [n for n in range(self.num_classes) if n != index_pos]
@@ -65,7 +67,7 @@ class KernelDensityLoss(nn.Module):
           arr_neg = list(range(len(self.digit_indices[index_neg])))
           shuffle(arr_neg)
           for neg_idx in arr_neg:
-            neg_prob = self.log_probs[index_neg,neg_idx,index_pos]
+            neg_prob = self.probs[index_neg,neg_idx,index_pos]
             if (pos_prob > neg_prob and neg_prob + self.margin_triplet > pos_prob):
               is_semihard = True
               break
@@ -86,12 +88,12 @@ class KernelDensityLoss(nn.Module):
 
   def softmax_loss(self, embeddings):
     # N spoofing classes, M utterances per class
-    N, M, _ = list(self.log_probs.size())
+    N, M, _ = list(self.probs.size())
 
     '''softmax_loss = 0
     for j in range(N):
       for i in range(M):
-        softmax = -F.log_softmax(self.log_probs[j,i], 0)[j]
+        softmax = -F.log_softmax(self.probs[j,i], 0)[j]
         if softmax > 0:
           softmax_loss += softmax
 
@@ -101,12 +103,12 @@ class KernelDensityLoss(nn.Module):
 
     ### WARNING ###
     # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
-    #L = [-self.softmax(self.log_probs[j,i])[j] for i in range(M) for j in range(N)]
+    #L = [-self.softmax(self.probs[j,i])[j] for i in range(M) for j in range(N)]
     L = []
     for j in range(N):
       L_row = []
       for i in range(M):
-        L_row.append(F.log_softmax(self.log_probs[j,i], 0)[j])
+        L_row.append(F.log_softmax(self.probs[j,i], 0)[j])
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
@@ -116,7 +118,7 @@ class KernelDensityLoss(nn.Module):
 
   def contrast_loss(self, embeddings):
     # N spoofing classes, M utterances per class
-    N, M, _ = list(self.log_probs.size())
+    N, M, _ = list(self.probs.size())
 
     ### WARNING ###
     # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
@@ -124,9 +126,9 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        probs_to_classes = self.log_probs[j,i]
+        probs_to_classes = self.probs[j,i]
         excl_probs_to_classes = torch.cat((probs_to_classes[:j], probs_to_classes[j+1:]))
-        L_row.append(torch.max(excl_probs_to_classes) - self.log_probs[j,i,j])
+        L_row.append(torch.max(excl_probs_to_classes) - self.probs[j,i,j])
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
@@ -145,7 +147,7 @@ class KernelDensityLoss(nn.Module):
     
     print('Distances computed')
     
-    log_probs = []
+    probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
       probs_row = []
       for utt_idx, utterance in enumerate(class_indices):
@@ -155,10 +157,11 @@ class KernelDensityLoss(nn.Module):
         probs_col = torch.stack(probs_col)
         probs_row.append(probs_col)
       probs_row = torch.stack(probs_row)
-      log_probs.append(probs_row)
-    self.log_probs = torch.stack(log_probs)
-    print(self.log_probs)
-    print(self.log_probs.size())
+      probs.append(probs_row)
+    self.probs = torch.stack(probs)
+    self.probs = self.probs * self.w + self.b
+    print(self.probs)
+    print(self.probs.size())
 
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
