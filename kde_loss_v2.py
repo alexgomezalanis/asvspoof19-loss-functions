@@ -39,7 +39,7 @@ class KernelDensityLoss(nn.Module):
     elif self.loss_method == 'triplet':
       self.embed_loss = self.triplet_loss
 
-  def get_log_prob(self, index_utt, index_class):
+  def get_likelihood(self, index_utt, index_class):
     probs = []
     n = 0
     for j in self.digit_indices[index_class]:
@@ -145,15 +145,13 @@ class KernelDensityLoss(nn.Module):
       for j in range(i+1, len(target)):
         self.distances[i][j] = torch.exp(-0.5 * torch.dist(embeddings[i], embeddings[j], 2))
     
-    print('Distances computed')
-    
     probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
       probs_row = []
       for utt_idx, utterance in enumerate(class_indices):
         probs_col = []
         for class_centroid in range(self.num_classes):
-          probs_col.append(self.get_log_prob(utterance, class_centroid))
+          probs_col.append(self.get_likelihood(utterance, class_centroid))
         probs_col = torch.stack(probs_col)
         probs_row.append(probs_col)
       probs_row = torch.stack(probs_row)
@@ -162,8 +160,6 @@ class KernelDensityLoss(nn.Module):
 
     torch.clamp(self.w, 1e-6)
     self.probs = self.w * self.probs + self.b
-    print(self.probs)
-    print(self.probs.size())
 
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
