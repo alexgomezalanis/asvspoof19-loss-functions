@@ -46,7 +46,7 @@ class KernelDensityLoss(nn.Module):
         index_j = max(index_utt, j)
         log_probs.append(self.distances[index_i][index_j])
         n += 1
-    return torch.log(torch.sum(torch.stack(log_probs)) / n)
+    return torch.sum(torch.stack(log_probs)) / n
 
   def triplet_loss(self, embeddings):    
     negative_probs = []
