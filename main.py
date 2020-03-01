@@ -14,8 +14,8 @@ from ge2e import GE2ELoss
 from utils.checkpoint import load_checkpoint, create_directory
 from get_data_backend import get_data_backend
 from get_data_softmax import get_data_softmax
-from kde_loss import KernelDensityLoss
-#from kde_loss_v2 import KernelDensityLoss
+#from kde_loss import KernelDensityLoss
+from kde_loss_v2 import KernelDensityLoss
 
 # Training settings
 parser = argparse.ArgumentParser(description='LCNN ASVspoof 2019')

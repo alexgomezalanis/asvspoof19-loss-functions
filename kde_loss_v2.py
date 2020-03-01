@@ -90,20 +90,8 @@ class KernelDensityLoss(nn.Module):
     # N spoofing classes, M utterances per class
     N, M, _ = list(self.probs.size())
 
-    '''softmax_loss = 0
-    for j in range(N):
-      for i in range(M):
-        softmax = -F.log_softmax(self.probs[j,i], 0)[j]
-        if softmax > 0:
-          softmax_loss += softmax
-
-    print('Softmax loss')
-    print(softmax_loss)
-    return softmax_loss'''
-
     ### WARNING ###
     # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
-    #L = [-self.softmax(self.probs[j,i])[j] for i in range(M) for j in range(N)]
     L = []
     for j in range(N):
       L_row = []
@@ -112,7 +100,6 @@ class KernelDensityLoss(nn.Module):
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
-    #softmax_loss = F.relu(L_torch).sum()
 
     return L_torch.sum()
 
@@ -126,14 +113,14 @@ class KernelDensityLoss(nn.Module):
     for j in range(N):
       L_row = []
       for i in range(M):
-        probs_to_classes = self.probs[j,i]
+        probs_to_classes = torch.sigmoid(self.probs[j,i])
         excl_probs_to_classes = torch.cat((probs_to_classes[:j], probs_to_classes[j+1:]))
-        L_row.append(torch.max(excl_probs_to_classes) - self.probs[j,i,j])
+        L_row.append(1.0 - torch.sigmoid(self.probs[j,i,j]) + torch.max(excl_probs_to_classes))
       L_row = torch.stack(L_row)
       L.append(L_row)
     L_torch = torch.stack(L)
 
-    return F.relu(L_torch).sum()
+    return L_torch.sum()
 
   def forward(self, embeddings, target, size_average=True):
     classes = np.unique(target)
