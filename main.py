@@ -67,7 +67,7 @@ parser.add_argument('--num-classes', type=int, default=7, metavar='N',
                     help='Number of training classes (2, 7, 10)')
 parser.add_argument('--loss-method', type=str, default='softmax',
                     help='softmax, angular_softmax_sphereface, angular_softmax_cosface, triplet, ge2e, kde-softmax, kde-contrast, kde-softmax_contrast, kde-triplet, kde-all')
-parser.add_argument('--optimize-bandwidth', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+parser.add_argument('--optimize-bandwidth', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to optimize the bandwidth of the KDE')
 parser.add_argument('--bandwidth', type=float, default=1.0,
                     help='Initialization of KDE bandwidth. v1 -> False; v2 -> True')

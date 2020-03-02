@@ -61,8 +61,8 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
 
   while num_epochs_not_improving < args.epochs:
     print('Epoch: ' + str(epoch))
-    #print('Criterion parameters')
-    #print(list(criterion.parameters()))
+    print('Criterion parameters')
+    print(list(criterion.parameters()))
     train_epoch(epoch, args, model, device, train_loader, optimizer, criterion)
     if args.loss_method != 'triplet':
       dev_loss = test_epoch(args, model, device, dev_loader, optimizer, criterion)

@@ -14,9 +14,9 @@ class KernelDensityLoss(nn.Module):
   def __init__(self, device, emb_size=64, init_w=10.0, init_b=0.1, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
-      self.variance = nn.Parameter(torch.tensor(init_bandwidth))
+      self.bandwidths = num_classes * [nn.Parameter(torch.tensor(init_bandwidth)).to(device)]
     else:
-      self.variance = torch.tensor(init_bandwidth)
+      self.bandwidths = num_classes * [init_bandwidth]
     self.w = nn.Parameter(torch.tensor(init_w)).to(device)
     self.b = nn.Parameter(torch.tensor(init_b)).to(device)
 
@@ -41,14 +41,12 @@ class KernelDensityLoss(nn.Module):
 
   def get_likelihood(self, index_utt, index_class):
     probs = []
-    n = 0
     for j in self.digit_indices[index_class]:
       if index_utt != j:
         index_i = min(index_utt, j)
         index_j = max(index_utt, j)
-        probs.append(self.distances[index_i][index_j])
-        n += 1
-    return torch.sum(torch.stack(probs)) / n
+        probs.append(torch.exp(-self.distances[index_i][index_j] / (2 * self.bandwidths[index_class])))
+    return torch.mean(torch.stack(probs))
 
   def triplet_loss(self, embeddings):    
     negative_probs = []
@@ -130,7 +128,7 @@ class KernelDensityLoss(nn.Module):
     self.distances = [[0] * len(target) for _ in range(len(target))]
     for i in range(len(target)):
       for j in range(i+1, len(target)):
-        self.distances[i][j] = torch.exp(-0.5 * torch.dist(embeddings[i], embeddings[j], 2))
+        self.distances[i][j] = torch.dist(embeddings[i], embeddings[j], 2)
     
     probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
