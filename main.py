@@ -109,8 +109,6 @@ if __name__ == '__main__':
       num_classes=args.num_classes
     )
 
-  print('Criterion parameters')
-  print(list(criterion.parameters()))
   params = list(model.parameters()) + list(criterion.parameters())
   optimizer = optim.Adam(params, lr=args.lr)
 
