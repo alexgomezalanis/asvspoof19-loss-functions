@@ -14,11 +14,11 @@ class KernelDensityLoss(nn.Module):
   def __init__(self, device, emb_size=64, init_w=10.0, init_b=0.1, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
-      self.bandwidths = num_classes * [nn.Parameter(torch.tensor(init_bandwidth)).to(device)]
+      self.bandwidths = num_classes * [nn.Parameter(torch.tensor(init_bandwidth).to(device))]
     else:
       self.bandwidths = num_classes * [init_bandwidth]
-    self.w = nn.Parameter(torch.tensor(init_w)).to(device)
-    self.b = nn.Parameter(torch.tensor(init_b)).to(device)
+    self.w = nn.Parameter(torch.tensor(init_w).to(device))
+    self.b = nn.Parameter(torch.tensor(init_b).to(device))
 
     self.emb_size = emb_size
     self.distributions = []
