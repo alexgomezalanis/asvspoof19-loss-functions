@@ -40,9 +40,9 @@ def train(args, model, start_epoch, criterion, optimizer, device, model_location
     num_classes=args.num_classes,
     normalize=args.normalize)
 
-  if args.loss_method == 'ge2e' or args.loss_method.startswith('kde'):
-    train_sampler = CustomSampler(data_source=train_dataset, shuffle=True)
-    dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False)
+  if args.loss_method == 'ge2e' or args.loss_method.startswith('kde') or args.loss_method == 'triplet':
+    train_sampler = CustomSampler(data_source=train_dataset, shuffle=True, num_classes=args.num_classes)
+    dev_sampler = CustomSampler(data_source=dev_dataset, shuffle=False, num_classes=args.num_classes)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False,
       num_workers=args.num_data_workers, sampler=train_sampler)
     dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False,
