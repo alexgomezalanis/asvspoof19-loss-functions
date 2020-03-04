@@ -30,6 +30,7 @@ class KernelDensityLoss(nn.Module):
     else:
       self.bandwidths = num_classes * [init_bandwidth]
 
+    self.scale_matrix = scale_matrix
     if scale_matrix:
       self.w = nn.Parameter(torch.tensor(init_w).to(device))
       self.b = nn.Parameter(torch.tensor(init_b).to(device))
@@ -157,7 +158,7 @@ class KernelDensityLoss(nn.Module):
       probs.append(probs_row)
     self.probs = torch.stack(probs)
 
-    if scale_matrix:
+    if self.scale_matrix:
       torch.clamp(self.w, 1e-6)
       self.probs = self.w * self.probs + self.b
 
