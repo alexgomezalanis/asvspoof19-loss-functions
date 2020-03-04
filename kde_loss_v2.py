@@ -138,17 +138,12 @@ class KernelDensityLoss(nn.Module):
   def forward(self, embeddings, target, size_average=True):
     classes = np.unique(target)
     self.num_classes = len(classes)
-    print('Classes')
-    print(classes)
     self.digit_indices = [np.where(target == i)[0] for i in range(self.num_classes)]
 
     self.distances = [[0] * len(target) for _ in range(len(target))]
     for i in range(len(target)):
       for j in range(i+1, len(target)):
         self.distances[i][j] = torch.dist(embeddings[i], embeddings[j], 2)
-    
-    print('Target size')
-    print(len(target))
 
     probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
@@ -157,18 +152,11 @@ class KernelDensityLoss(nn.Module):
         probs_col = []
         for class_centroid in range(self.num_classes):
           probs_col.append(self.get_likelihood(utterance, class_centroid))
-        print('Length Probs col')
-        print(len(probs_col))
         probs_col = torch.stack(probs_col)
         probs_row.append(probs_col)
-      print('Length Probs row')
-      print(len(probs_row))
       probs_row = torch.stack(probs_row)
       probs.append(probs_row)
     self.probs = torch.stack(probs)
-
-    print('Probs size')
-    print(self.probs.size())
 
     if self.scale_matrix:
       torch.clamp(self.w, 1e-6)
