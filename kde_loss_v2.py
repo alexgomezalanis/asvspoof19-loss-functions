@@ -147,8 +147,8 @@ class KernelDensityLoss(nn.Module):
       for j in range(i+1, len(target)):
         self.distances[i][j] = torch.dist(embeddings[i], embeddings[j], 2)
     
-    print('Distances size')
-    print(self.distances.size())
+    print('Target size')
+    print(len(target))
 
     probs = []
     for class_idx, class_indices in enumerate(self.digit_indices):
