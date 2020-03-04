@@ -11,14 +11,28 @@ class KernelDensityLoss(nn.Module):
   Takes a batch of embeddings and corresponding labels.
   """
 
-  def __init__(self, device, emb_size=64, init_w=10.0, init_b=0.1, init_bandwidth=1.0, loss_method='softmax', margin_triplet=1.0, optimize_bandwidth=True, num_classes=7):
+  def __init__(
+    self,
+    device,
+    emb_size=64,
+    scale_matrix=True,
+    init_w=10.0,
+    init_b=0.1,
+    init_bandwidth=1.0,
+    loss_method='softmax',
+    margin_triplet=1.0,
+    optimize_bandwidth=True,
+    num_classes=7
+  ):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
       self.bandwidths = nn.Parameter(torch.tensor(num_classes * [init_bandwidth]).to(device))
     else:
       self.bandwidths = num_classes * [init_bandwidth]
-    self.w = nn.Parameter(torch.tensor(init_w).to(device))
-    self.b = nn.Parameter(torch.tensor(init_b).to(device))
+
+    if scale_matrix:
+      self.w = nn.Parameter(torch.tensor(init_w).to(device))
+      self.b = nn.Parameter(torch.tensor(init_b).to(device))
 
     self.emb_size = emb_size
     self.distributions = []
@@ -143,8 +157,9 @@ class KernelDensityLoss(nn.Module):
       probs.append(probs_row)
     self.probs = torch.stack(probs)
 
-    torch.clamp(self.w, 1e-6)
-    self.probs = self.w * self.probs + self.b
+    if scale_matrix:
+      torch.clamp(self.w, 1e-6)
+      self.probs = self.w * self.probs + self.b
 
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)

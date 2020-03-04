@@ -69,6 +69,8 @@ parser.add_argument('--loss-method', type=str, default='softmax',
                     help='softmax, angular_softmax_sphereface, angular_softmax_cosface, triplet, ge2e, kde-softmax, kde-contrast, kde-softmax_contrast, kde-triplet, kde-all')
 parser.add_argument('--optimize-bandwidth', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to optimize the bandwidth of the KDE')
+parser.add_argument('--scale-matrix', default=True, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+                    help='Whether to scale the KDE matrix')
 parser.add_argument('--bandwidth', type=float, default=1.0,
                     help='Initialization of KDE bandwidth. v1 -> False; v2 -> True')
 parser.add_argument('--normalize', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
@@ -106,7 +108,8 @@ if __name__ == '__main__':
       init_bandwidth=args.bandwidth,
       optimize_bandwidth=args.optimize_bandwidth,
       margin_triplet=args.margin_triplet,
-      num_classes=args.num_classes
+      num_classes=args.num_classes,
+      scale_matrix=args.scale_matrix
     )
 
   params = list(model.parameters()) + list(criterion.parameters())
