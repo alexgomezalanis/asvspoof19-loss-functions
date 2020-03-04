@@ -157,8 +157,12 @@ class KernelDensityLoss(nn.Module):
         probs_col = []
         for class_centroid in range(self.num_classes):
           probs_col.append(self.get_likelihood(utterance, class_centroid))
+        print('Length Probs col')
+        print(len(probs_col))
         probs_col = torch.stack(probs_col)
         probs_row.append(probs_col)
+      print('Length Probs row')
+      print(len(probs_row))
       probs_row = torch.stack(probs_row)
       probs.append(probs_row)
     self.probs = torch.stack(probs)
