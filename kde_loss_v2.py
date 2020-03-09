@@ -22,7 +22,8 @@ class KernelDensityLoss(nn.Module):
     loss_method='softmax',
     margin_triplet=1.0,
     optimize_bandwidth=True,
-    num_classes=7
+    num_classes=7,
+    kde_log=False
   ):
     super(KernelDensityLoss, self).__init__()
     if optimize_bandwidth:
@@ -31,6 +32,7 @@ class KernelDensityLoss(nn.Module):
       self.bandwidths = num_classes * [init_bandwidth]
 
     self.scale_matrix = scale_matrix
+    self.kde_log = kde_log
     if scale_matrix:
       self.w = nn.Parameter(torch.tensor(init_w).to(device))
       self.b = nn.Parameter(torch.tensor(init_b).to(device))
@@ -50,7 +52,10 @@ class KernelDensityLoss(nn.Module):
     if self.loss_method == 'softmax':
       self.embed_loss = self.softmax_loss
     elif self.loss_method == 'contrast':
-      self.embed_loss = self.contrast_loss
+      if kde_log:
+        self.embed_loss = self.contrast_loss_log
+      else:
+        self.embed_loss = self.contrast_loss
     elif self.loss_method == 'triplet':
       self.embed_loss = self.triplet_loss
 
@@ -61,7 +66,10 @@ class KernelDensityLoss(nn.Module):
         index_i = min(index_utt, j)
         index_j = max(index_utt, j)
         probs.append(torch.exp(-self.distances[index_i][index_j] / (2 * self.bandwidths[index_class])))
-    return torch.mean(torch.stack(probs))
+    likelihood = torch.mean(torch.stack(probs))
+    if self.kde_log:
+      return torch.log(likelihood)
+    return likelihood
 
   def triplet_loss(self, embeddings):    
     negative_probs = []
@@ -135,6 +143,25 @@ class KernelDensityLoss(nn.Module):
 
     return L_torch.sum()
 
+  def contrast_loss_log(self, embeddings):
+    # N spoofing classes, M utterances per class
+    N, M, _ = list(self.probs.size())
+
+    ### WARNING ###
+    # torch.sum() doesn't work fine. Issue: https://github.com/pytorch/pytorch/issues/5863
+    L = []
+    for j in range(N):
+      L_row = []
+      for i in range(M):
+        probs_to_classes = self.probs[j,i]
+        excl_probs_to_classes = torch.cat((probs_to_classes[:j], probs_to_classes[j+1:]))
+        L_row.append(torch.max(excl_probs_to_classes) - self.probs[j,i,j])
+      L_row = torch.stack(L_row)
+      L.append(L_row)
+    L_torch = torch.stack(L)
+
+    return F.relu(L_torch).sum()
+
   def forward(self, embeddings, target, size_average=True):
     classes = np.unique(target)
     self.num_classes = len(classes)
@@ -165,7 +192,10 @@ class KernelDensityLoss(nn.Module):
     if self.loss_method == 'all':
       loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings) + self.triplet_loss(embeddings)
     elif self.loss_method == 'softmax_contrast':
-      loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings)
+      if self.kde_log:
+        loss = self.softmax_loss(embeddings) + self.contrast_loss_log(embeddings)
+      else:
+        loss = self.softmax_loss(embeddings) + self.contrast_loss(embeddings)
     else:
       loss = self.embed_loss(embeddings)
 

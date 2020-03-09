@@ -75,6 +75,8 @@ parser.add_argument('--bandwidth', type=float, default=1.0,
                     help='Initialization of KDE bandwidth. v1 -> False; v2 -> True')
 parser.add_argument('--normalize', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
                     help='Whether to normalize the utterance: mean and variance normalization')
+parser.add_argument('--kde-log', default=False, type=lambda x: (str(x).lower() in ['true', 'yes', '1']),
+                    help='Whether to use the log with KDE')
 
 rootPath = os.getcwd()
                   
@@ -109,7 +111,8 @@ if __name__ == '__main__':
       optimize_bandwidth=args.optimize_bandwidth,
       margin_triplet=args.margin_triplet,
       num_classes=args.num_classes,
-      scale_matrix=args.scale_matrix
+      scale_matrix=args.scale_matrix,
+      kde_log=args.kde_log
     )
 
   params = list(model.parameters()) + list(criterion.parameters())

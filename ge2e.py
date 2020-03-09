@@ -90,6 +90,8 @@ class GE2ELoss(nn.Module):
     '''
     Calculates the GE2E loss for an input of dimensions (num_speakers, num_utts_per_speaker, dvec_feats)
     '''
+    embeddings = F.normalize(embeddings, p=2, dim=1)
+    
     classes = np.unique(target)
     digit_indices = [np.where(target == i)[0] for i in classes]
     dvecs = []
